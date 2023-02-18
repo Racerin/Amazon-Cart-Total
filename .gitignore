@@ -1,0 +1,7 @@
+# Security reasons.
+*.html
+*.env
+*[Aa]mazon*
+
+# Virtual Environment
+venv
