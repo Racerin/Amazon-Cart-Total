@@ -3,5 +3,11 @@
 *.env
 *[Aa]mazon*
 
+# Noise
+*__pycache__
+
 # Virtual Environment
 venv
+
+# VS Code
+.vscode
