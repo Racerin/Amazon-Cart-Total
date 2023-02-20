@@ -56,7 +56,7 @@ def _path_valid_absolute(path:str, quiet=False) -> 'str|None':
         else:
             raise exc from None
         
-def get_file_text(path, encoding="utf8", line_joiner:str="\n"):
+def get_file_text(path:str, encoding="utf8", line_joiner:str="\n"):
     """ 
     Get text from file. 
     path: path to file. Must be valid.
@@ -89,8 +89,7 @@ def valid_wishlist_path(path:str) -> bool:
     text = get_file_text(path)
     return valid_wishlist_text(text)
 
-# def get_wishlist_files_in_directory(directory:str=".", quiet=False)->'None|list[str]':
-def get_wishlist_files_in_directory(_test=False)->'None|list[str]':
+def get_wishlist_files_in_directory(_test:bool=False)->'None|list[str]':
     """ 
     Get all html wishlist files in directory.
     Gets files according to file extension (*.htm[l])
@@ -105,6 +104,17 @@ def get_wishlist_files_in_directory(_test=False)->'None|list[str]':
         paths3, paths4 = list(), list()
     paths = paths1 + paths2 + paths3 + paths4
     return paths
+
+def get_xpath_in_text(xpath:str, text:str)->list[str]:
+    """
+    Returns a list of xpath matches of text.
+    """
+    if not isinstance(xpath, str): raise TypeError("Argument 'xpath' '{}' is not of type 'str'.".format(xpath))
+    if not isinstance(text, str): raise TypeError("Argument 'text' '{}' is not of type 'str'.".format(text))
+    tree = etree.HTML(text)
+    html_elements = tree.xpath(xpath)
+    match_texts = list((ele.text for ele in html_elements))
+    return match_texts
 
 
 @dataclass
@@ -173,47 +183,65 @@ class CalculateTotal():
         """ Sets the amazon wishlist file path in class """
         self.wishlist_path = self.get_wishlist_file_path()
 
-    def list_regex_matches(self, patt=REGEX_COST, limit=None):
+    def wishlist_regex_matches(self, patt:str)->list[str]:
+        """ 
+        Sequence of regular expression matches found in wishlist.
+        """
+        text = get_file_text(self.wishlist_path)
+        regex_matches = re.finditer(patt, text)
+        # Extract text from each re match
+        sub_texts = list((match.group(0) for match in regex_matches))
+        return sub_texts
+
+    def list_regex_matches(self, patt:str, limit=None):
         """ 
         Prints the regular expression matches found.
         limit: int representing maximum of printable values. abs(limit)
-        TODO: Remove default for patt
         """
-        text = get_file_text(self.wishlist_path)
-        sub_texts = re.findall(patt, text)
+        sub_texts = self.wishlist_regex_matches(patt)
+        # Set a default max value for limit if none is given.
         limit = abs(limit) if isinstance(limit, int) else len(sub_texts)
-
+        # OUTPUT text
         print("This is the pattern: {}".format(patt))
         for i, sub_text in enumerate(sub_texts):
             if i > limit:
                 break
             print("{}. {}".format(i+1, sub_text))
 
-    def list_xpath_matches(self, xpath=XPATH_PRICE, limit=None):
+    def wishlist_xpath_matches(self, xpath:str)->list[str]:
+        """ 
+        Sequence of xpath matches found in HTML wishlist.
+        """
+        wishlist_html_text = get_file_text(self.wishlist_path)
+        sub_texts = get_xpath_in_text(xpath, wishlist_html_text)
+        return sub_texts
+
+    def list_xpath_matches(self, xpath:str, limit=None):
         """ 
         Print the xpath matches found.
         limit: int representing maximum of printable values. abs(limit)
-        TODO: Remove default for xpath
         """
-        text = get_file_text(self.wishlist_path)
-        tree = etree.HTML(text)
-        prices = tree.xpath(xpath)
-        limit = abs(limit) if isinstance(limit, int) else len(prices)
+        sub_texts = self.wishlist_xpath_matches(xpath)
+        # Set a default max value for limit if none is given.
+        limit = abs(limit) if isinstance(limit, int) else len(sub_texts)
+        # OUTPUT Text
         print("This is the xpath pattern: {}".format(xpath))
-        for i, price in enumerate(prices):
+        for i, price in enumerate(sub_texts):
             print("{}. {}".format(i+1, price))
 
 
     def main(self)-> None:
-        """ Main function for reading and returning sum of items in amazon wishlist. """
+        """ 
+        Main function for reading and returning sum of items in amazon wishlist.
+        TODO: shipping cost
+        """
         text = get_file_text(self.wishlist_path)
-        tree = etree.HTML(text)
-        whole_num_cash = tree.xpath(XPATH_WHOLE_PRICE)
-        fraction_num_cash = tree.xpath(XPATH_FRACTION_PRICE)
+        whole_num_cash = get_xpath_in_text(XPATH_WHOLE_PRICE, text)
+        fraction_num_cash = get_xpath_in_text(XPATH_FRACTION_PRICE, text)
         moneys = list()
-        for ele_pair in zip(whole_num_cash, fraction_num_cash):
-            cost_text = ".".join(ele.text.strip() for ele in ele_pair)
+        for whole_text, fraction_text in zip(whole_num_cash, fraction_num_cash):
+            cost_text = "{}.{}".format(whole_text.strip(), fraction_text.strip())
             cost = float(cost_text)
             moneys.append(cost)
-        _sum = sum(moneys)
-        print("This is how much it cost: ${:.2f}".format(_sum))
+        total = sum(moneys)
+        print("This is how much it cost: ${:.2f}".format(total))
