@@ -93,5 +93,58 @@ class TestGetWishlistFilePath(unittest.TestCase):
                 os.remove(temp_wishlist_file.name)
 
 
-class TestListRegexMatches(unittest.TestCase):
-    pass
+class TestWishlistRegexMatches(unittest.TestCase):
+    wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
+
+    def test_positive(self):
+        """ Ensure that regex patterns works on wishlist HTML text. """
+        obj = lib.CalculateTotal(self.wishlist_path)
+        for patt in TEST_REGEX_MATCHES_PATTERNS:
+            # Function
+            sub_texts = obj.wishlist_regex_matches(patt)
+            # Assert output type
+            assert isinstance(sub_texts, list), type(sub_texts)
+            assert len(sub_texts) > 0, patt
+            # Assert each element of sub_texts is a str
+            gen_is_strs = (isinstance(sub_text, str) for sub_text in sub_texts)
+            sub_text_and_type_pairs = tuple((sub_text,type(sub_text)) for sub_text in sub_texts)
+            assert all(gen_is_strs), \
+                (sub_text_and_type_pairs[:5], "And there is more. The following is the regex pattern", patt)
+            # Assert each element of sub_text is a str of length
+            gen_is_str_length = (len(sub_text) > 0 for sub_text in sub_texts)
+            sub_text_and_len = tuple((sub_text,len(sub_text)) for sub_text in sub_texts)
+            assert all(gen_is_str_length), \
+                (sub_text_and_len[:5], "And there is more. The following is the regex pattern", patt)
+
+
+class TestListXpathMatches(unittest.TestCase):
+    wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
+    
+    def test_positive(self):
+        """ Ensure that xpath patterns works on wishlist HTML text. """
+        obj = lib.CalculateTotal(self.wishlist_path)
+        for xpath in TEST_XPATH_MATCHES_PATTERNS:
+            # Function
+            sub_texts = obj.wishlist_xpath_matches(xpath)
+            # Assert output type
+            assert isinstance(sub_texts, list), type(sub_texts)
+            assert len(sub_texts) > 0, xpath
+            # Assert each element of sub_texts is a str
+            gen_is_strs = (isinstance(sub_text, str) for sub_text in sub_texts)
+            sub_text_and_type_pairs = tuple((sub_text,type(sub_text)) for sub_text in sub_texts)
+            assert all(gen_is_strs), \
+                (sub_text_and_type_pairs[:5], "And there is more. The following is the regex pattern", xpath)
+            # Assert each element of sub_text is a str of length
+            gen_is_str_length = (len(sub_text) > 0 for sub_text in sub_texts)
+            sub_text_and_len = tuple((sub_text,len(sub_text)) for sub_text in sub_texts)
+            assert all(gen_is_str_length), \
+                (sub_text_and_len[:5], "And there is more. The following is the regex pattern", xpath)
+
+
+class TestMain(unittest.TestCase):
+    wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
+
+    def test_positive(self):
+        """ Just run the 'main' function of 'CalculateTotal' and see if it works. """
+        obj = lib.CalculateTotal(self.wishlist_path)
+        obj.main()

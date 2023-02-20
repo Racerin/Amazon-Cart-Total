@@ -71,9 +71,40 @@ class TestValidWishlist(unittest.TestCase):
 class TestGetWishlistFilesInDirectory(unittest.TestCase):
     def test_positive(self):
         val = lib.get_wishlist_files_in_directory(_test=True)
-        assert isinstance(val, list)
-        assert len(val) >= 2, len(val)
+        assert isinstance(val, list), type(val)
+        assert len(val) >= 2, val
         gen_type_str = (isinstance(path, str) for path in val)
         gen_ends_with_htm = (path.endswith('htm') or path.endswith('html') for path in val)
         assert all(gen_type_str)
         assert all(gen_ends_with_htm)
+
+class TestGetXpathInText(unittest.TestCase):
+    wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
+    wishlist_text = lib.get_file_text(wishlist_path)
+
+    def test_positive(self):
+        for _xpath in TEST_XPATH_MATCHES_PATTERNS:
+            val = lib.get_xpath_in_text(_xpath, self.wishlist_text)
+            # Test Output value
+            assert isinstance(val, list), (type(val), _xpath)
+            assert len(val) > 0, (_xpath, val)
+            gen_type_str = (isinstance(path, str) for path in val)
+            assert all(gen_type_str)
+
+    def test_negative(self):
+        """ Confirm that improper inputs results in errors. """
+        inputs = (
+            1,
+            dict(),
+            list(),
+            tuple(),
+            False,
+        )
+        # Test improper patterns 1st
+        for _input in inputs:
+            with self.assertRaises(TypeError):
+                lib.get_xpath_in_text(_input, self.wishlist_text)
+        # Now, test improper text value
+        for _input in inputs:
+            with self.assertRaises(TypeError):
+                lib.get_xpath_in_text(XPATH_WHOLE_PRICE, _input)
