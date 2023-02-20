@@ -1,6 +1,6 @@
 # Security reasons.
 *.html
-*.env
+.env
 *[Aa]mazon*
 
 # Noise
