@@ -2,6 +2,7 @@
 *.html
 .env
 *[Aa]mazon*
+*.log
 
 # Noise
 *__pycache__
