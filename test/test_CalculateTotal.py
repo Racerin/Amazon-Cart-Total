@@ -1,6 +1,7 @@
 import unittest
 import os
 import shutil
+import sys, io
 
 from . import *
 import lib
@@ -142,9 +143,21 @@ class TestListXpathMatches(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
+    # TODO: Confirm output is expected
     wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
+
+    def setUp(self) -> None:
+        # Prevent print-out  # https://stackoverflow.com/a/63631661
+        suppress_text = io.StringIO()
+        sys.stdout = suppress_text 
+
+    def tearDown(self) -> None:
+        # Restoring print-out
+        sys.stdout = sys.__stdout__
 
     def test_positive(self):
         """ Just run the 'main' function of 'CalculateTotal' and see if it works. """
         obj = lib.CalculateTotal(self.wishlist_path)
         obj.main()
+        obj2 = lib.CalculateTotal(self.wishlist_path, breakdown=True)
+        obj2.main()
