@@ -143,21 +143,43 @@ class TestListXpathMatches(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    # TODO: Confirm output is expected
     wishlist_path = TEST_ASSETS_FILES_WISHLISTS[0]
 
     def setUp(self) -> None:
         # Prevent print-out  # https://stackoverflow.com/a/63631661
-        suppress_text = io.StringIO()
-        sys.stdout = suppress_text 
+        self.suppress_text = io.StringIO()
+        sys.stdout = self.suppress_text 
 
     def tearDown(self) -> None:
         # Restoring print-out
         sys.stdout = sys.__stdout__
 
+    def get_io_stream_text(self)->str:
+        """ Returns text stored in diverted IOString. """
+        return self.suppress_text.getvalue()
+
     def test_positive(self):
         """ Just run the 'main' function of 'CalculateTotal' and see if it works. """
+        # Run the program with a built-in wishlist
         obj = lib.CalculateTotal(self.wishlist_path)
         obj.main()
+        # Get the print-out at that point in testing
+        print_out = self.get_io_stream_text()
+        assert "This is how much it cost" in print_out, print_out
+        assert print_out.count("This is how much it cost") > 1, print_out
+        assert "This is how much shipping cost: $" in print_out, print_out
+
+
+        # Run the program with breakdown read-out.
         obj2 = lib.CalculateTotal(self.wishlist_path, breakdown=True)
         obj2.main()
+        # Get the print-out at that point in testing
+        print_out2 = self.get_io_stream_text().replace(print_out, "")
+        assert print_out not in print_out2
+        # Function output assertions.
+        assert "This is how much it cost" in print_out2, print_out2
+        assert print_out2.count("This is how much it cost") > 1
+        assert "This is how much shipping cost: $" in print_out2, print_out2
+        # breakdown specific
+        assert "Item cost: $" in print_out2, print_out2
+        assert print_out2.count("Item cost: $") > 20
