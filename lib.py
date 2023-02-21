@@ -236,6 +236,7 @@ class CalculateTotal():
         Main function for reading and returning sum of items in amazon wishlist.
         """
         text = get_file_text(self.wishlist_path)
+        
         # Method 1
         print("First search/parse method.")
         whole_num_cash = get_xpath_in_text(XPATH_WHOLE_PRICE, text)
@@ -246,8 +247,11 @@ class CalculateTotal():
             cost = float(cost_text)
             moneys.append(cost)
             if self.breakdown: print("Item cost: ${:.2f}".format(cost))
+        n_moneys = len(moneys)
         total = sum(moneys)
+        print("Number of items: {}".format(n_moneys))
         print("This is how much it cost: ${:.2f}".format(total))
+
         # Method 2
         print("Second search/parse method.")
         cost_texts = get_xpath_in_text(XPATH_PRICE, text)
@@ -258,8 +262,11 @@ class CalculateTotal():
             cost = float(money_text)
             moneys2.append(cost)
             if self.breakdown: print("Item cost: ${:.2f}".format(cost))
+        n_moneys2 = len(moneys2)
         total2 = sum(moneys2)
+        print("Number of items: {}".format(n_moneys2))
         print("This is how much it cost: ${:.2f}".format(total2))
+
         #  Shipping Costs
         shipping_cost_texts = get_xpath_in_text(XPATH_SHIPPING_PRICE, text)
         moneys_shipping = list()
@@ -273,5 +280,7 @@ class CalculateTotal():
             else:
                 logging.info("Shipping costs not found.")
         else:
+            n_moneys_shipping = len(moneys_shipping)
             total_shipping = sum(moneys_shipping)
+            print("Number of items with shipping cost: {}".format(n_moneys_shipping))
             print("This is how much shipping cost: ${:.2f}".format(total_shipping))
