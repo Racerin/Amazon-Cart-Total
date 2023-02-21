@@ -120,6 +120,7 @@ def get_xpath_in_text(xpath:str, text:str)->list[str]:
 @dataclass
 class CalculateTotal():
     wishlist_path : str = ""
+    breakdown : bool = False
 
     def __post_init__(self):
         self.update_wishlist_file_path()
@@ -233,9 +234,10 @@ class CalculateTotal():
     def main(self)-> None:
         """ 
         Main function for reading and returning sum of items in amazon wishlist.
-        TODO: shipping cost
         """
         text = get_file_text(self.wishlist_path)
+        # Method 1
+        print("First search/parse method.")
         whole_num_cash = get_xpath_in_text(XPATH_WHOLE_PRICE, text)
         fraction_num_cash = get_xpath_in_text(XPATH_FRACTION_PRICE, text)
         moneys = list()
@@ -243,5 +245,33 @@ class CalculateTotal():
             cost_text = "{}.{}".format(whole_text.strip(), fraction_text.strip())
             cost = float(cost_text)
             moneys.append(cost)
+            if self.breakdown: print("Item cost: ${:.2f}".format(cost))
         total = sum(moneys)
         print("This is how much it cost: ${:.2f}".format(total))
+        # Method 2
+        print("Second search/parse method.")
+        cost_texts = get_xpath_in_text(XPATH_PRICE, text)
+        moneys2 = list()
+        for cost_text in cost_texts:
+            # Remove money sign
+            money_text = cost_text.strip().removeprefix('$').strip()
+            cost = float(money_text)
+            moneys2.append(cost)
+            if self.breakdown: print("Item cost: ${:.2f}".format(cost))
+        total2 = sum(moneys2)
+        print("This is how much it cost: ${:.2f}".format(total2))
+        #  Shipping Costs
+        shipping_cost_texts = get_xpath_in_text(XPATH_SHIPPING_PRICE, text)
+        moneys_shipping = list()
+        for shipping_cost_text in shipping_cost_texts:
+            # Get only number text
+            money_match = re.search(REGEX_MONEY_NUMBER, shipping_cost_text)
+            if money_match:
+                cost = float(money_match.group(0))
+                moneys_shipping.append(cost)
+                if self.breakdown: print("Shipping cost: ${:.2f}".format(cost))
+            else:
+                logging.info("Shipping costs not found.")
+        else:
+            total_shipping = sum(moneys_shipping)
+            print("This is how much shipping cost: ${:.2f}".format(total_shipping))

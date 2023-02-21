@@ -4,6 +4,8 @@ XPATH_WHOLE_PRICE = r"//span[@class='a-price-whole']"
 XPATH_FRACTION_PRICE = r"//span[@class='a-price-fraction']"
 XPATH_CURRENCY = None
 # XPATH_PRICE = r"//span[@id='itemPrice_*']/span[@class='a-offscreen']"
+XPATH_PRICE = r'//span[@class="a-price"]/span[@class="a-offscreen"]'
+XPATH_SHIPPING_PRICE = r"//div[@class='a-section price-section']/span/span[@class='a-color-secondary a-size-base']"
 
 REGEX_WHOLE_PRICE = r'class="a-price-whole">'
 # REGEX_FRACTION_PRICE = XPATH_FRACTION_PRICE
@@ -11,6 +13,7 @@ REGEX_WHOLE_PRICE = r'class="a-price-whole">'
 # REGEX_VALID_WISHLIST_LIST = (REGEX_WHOLE_PRICE, )
 REGEX_VALID_WISHLIST_LIST = (REGEX_WHOLE_PRICE,)
 REGEX_COST = r'(?>class="a-offscreen">\$)(\d+\.\d+)|(\d+)'
+REGEX_MONEY_NUMBER = r"\d+\.\d{2}"
 
 # GLOB_WISHLIST = "*\.htm?(l)"
 # GLOB_WISHLIST = r"*.htm?(l)"
@@ -20,6 +23,7 @@ GLOB_WISHLIST3 = r"**/*[.]htm"
 GLOB_WISHLIST4 = r"**/*[.]htm"
 
 CLI_REGEX_FIND_LIMIT = 1e3
+CLI_XPATH_FIND_LIMIT = 1e3
 
 TEST_ASSETS_FILES_WISHLISTS = (
     r'test\assets\wishlist1.html',
@@ -35,6 +39,7 @@ TEST_REGEX_MATCHES_PATTERNS = (
 TEST_XPATH_MATCHES_PATTERNS = (
     XPATH_WHOLE_PRICE,
     XPATH_FRACTION_PRICE,
+    XPATH_PRICE,
 )
 
 FILES_EXISTS = (
